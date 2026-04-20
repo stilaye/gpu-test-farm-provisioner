@@ -9,7 +9,7 @@
 
 - name: Copy test matrix config to node
   copy:
-    src: "{{ playbook_dir }}/../docker/test_matrix.json"
+    src: "{{ playbook_dir }}/../../docker/test_matrix.json"
     dest: /opt/test_matrix.json
     mode: '0644'
 
