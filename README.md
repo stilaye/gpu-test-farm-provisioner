@@ -219,12 +219,6 @@ virsh list --all  # Verify real KVM VMs
 
 ---
 
-## Interview Talking Points
-
-> "I built a miniature GPU test farm provisioner to get hands-on experience with the exact stack in the JD — KVM, Ansible, Docker, and Terraform. It provisions nodes via Terraform (Docker on Mac, swappable to KVM/libvirt for Linux), configures them with Ansible roles (idempotent CUDA stub, Docker install), and runs test workloads in containers. The Docker image compiles three C validation tools — one each with cmake, autoconf, and meson — so I have firsthand experience with all three build systems. The Python orchestrator dispatches jobs across nodes, collects JSON results, and generates a summary report. Same architecture as a real GPU validation farm, just miniaturized."
-
----
-
 ## Tags
 
 `ansible` `docker` `kvm` `terraform` `test-automation` `cuda` `ci-cd` `cmake` `autoconf` `meson` `gpu`
