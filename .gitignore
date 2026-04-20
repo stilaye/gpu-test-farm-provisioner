@@ -15,6 +15,7 @@ docker/cuda-test.tar
 docker/*.tar
 
 # Python
+.venv/
 __pycache__/
 *.pyc
 *.pyo

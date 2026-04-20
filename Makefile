@@ -1,15 +1,20 @@
 # GPU Test Farm Provisioner — Makefile (Mac variant, Docker Desktop)
+# First time: ./setup.sh && source .venv/bin/activate
 # Full workflow: make all
 # Tear down:    make clean
 
-.PHONY: all infra-up configure build test report clean help
+.PHONY: all setup infra-up configure build test report clean help
 
 MATRIX    := docker/test_matrix.json
 RESULTS   := results
 INVENTORY := ansible/inventory/hosts.yml
+PYTHON    := $(shell [ -f .venv/bin/python3 ] && echo .venv/bin/python3 || echo python3)
 
 help: ## Show available targets
 	@grep -E '^[a-zA-Z_-]+:.*##' $(MAKEFILE_LIST) | awk 'BEGIN{FS=":.*## "}{printf "  %-14s %s\n", $$1, $$2}'
+
+setup: ## Install all dependencies (Terraform, Ansible, Python venv)
+	bash setup.sh
 
 infra-up: ## Provision node containers via Terraform
 	@echo "==> Provisioning GPU test nodes..."
@@ -32,11 +37,11 @@ build: ## Build the CUDA test workload container
 test: ## Run test matrix across all nodes
 	@echo "==> Running test matrix..."
 	@mkdir -p $(RESULTS)
-	python3 scripts/orchestrate.py --matrix $(MATRIX) --results-dir $(RESULTS)
+	$(PYTHON) scripts/orchestrate.py --matrix $(MATRIX) --results-dir $(RESULTS)
 
 report: ## Generate aggregated test report
 	@echo ""
-	python3 scripts/generate_report.py --results-dir $(RESULTS)
+	$(PYTHON) scripts/generate_report.py --results-dir $(RESULTS)
 
 all: infra-up configure build test report ## Full workflow: provision → configure → build → test → report
 
