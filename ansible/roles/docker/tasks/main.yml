@@ -1,25 +1,46 @@
 ---
-# Install Docker CLI — socket is mounted from host (Mac variant)
-# On KVM VMs, this installs full Docker CE engine
-
 - name: Update apt cache
   apt:
     update_cache: yes
     cache_valid_time: 3600
 
-- name: Install Docker CLI
+- name: Install apt prerequisites
   apt:
-    name: docker.io
+    name:
+      - ca-certificates
+      - curl
+      - gnupg
     state: present
 
-- name: Ensure docker group exists
-  group:
-    name: docker
+- name: Create Docker GPG keyring directory
+  file:
+    path: /etc/apt/keyrings
+    state: directory
+    mode: '0755'
+
+- name: Add Docker GPG key
+  shell: |
+    curl -fsSL https://download.docker.com/linux/ubuntu/gpg \
+      | gpg --dearmor -o /etc/apt/keyrings/docker.gpg
+  args:
+    creates: /etc/apt/keyrings/docker.gpg
+
+- name: Add Docker apt repository
+  apt_repository:
+    repo: "deb [arch=amd64 signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu jammy stable"
+    state: present
+    update_cache: yes
+
+- name: Install Docker CE CLI
+  apt:
+    name: docker-ce-cli
     state: present
 
-- name: Start and enable Docker service (if running as VM)
-  systemd:
-    name: docker
-    state: started
-    enabled: yes
-  ignore_errors: yes
+- name: Verify Docker CLI installed
+  command: docker --version
+  register: docker_ver
+  changed_when: false
+
+- name: Print Docker version
+  debug:
+    msg: "{{ docker_ver.stdout }}"
