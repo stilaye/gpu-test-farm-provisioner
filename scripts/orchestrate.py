@@ -62,7 +62,7 @@ def dispatch_job(client: docker.DockerClient, node_name: str, config: dict, resu
 
     cmd_parts = [f"--gpu {gpu}", f"--cuda {cuda}"]
     for s in suites:
-        cmd_parts.append(f"--suite {s}")
+        cmd_parts += ["--suite", s]
 
     start = time.monotonic()
     try:
@@ -110,7 +110,7 @@ def dispatch_job(client: docker.DockerClient, node_name: str, config: dict, resu
         "tests":          test_results,
     }
 
-    fname = f"{gpu}_{cuda}.json".replace(".", "_")
+    fname = f"{gpu}_{cuda.replace('.', '_')}.json"
     with open(node_results_dir / fname, "w") as f:
         json.dump(result, f, indent=2)
 

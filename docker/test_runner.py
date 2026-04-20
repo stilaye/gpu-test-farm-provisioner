@@ -107,10 +107,16 @@ def main():
     parser = argparse.ArgumentParser(description="CUDA test workload runner")
     parser.add_argument("--gpu",    default=None, help="GPU type filter")
     parser.add_argument("--cuda",   default=None, help="CUDA version filter")
-    parser.add_argument("--suite",  default=None, help="Test suite to run")
+    parser.add_argument("--suite",  action="append", dest="suites", help="Test suite (repeatable)")
     parser.add_argument("--matrix", default="/tests/test_matrix.json")
     parser.add_argument("--output", default="/results")
     args = parser.parse_args()
+
+    # Write the CUDA version stub dynamically so version checks match the config
+    if args.cuda:
+        cuda_ver_file = Path("/usr/local/cuda/version.txt")
+        if cuda_ver_file.parent.exists():
+            cuda_ver_file.write_text(f"CUDA Version {args.cuda}\n")
 
     with open(args.matrix) as f:
         matrix = json.load(f)
@@ -121,8 +127,8 @@ def main():
         configs = [c for c in configs if c["gpu_type"] == args.gpu]
     if args.cuda:
         configs = [c for c in configs if c["cuda_version"] == args.cuda]
-    if args.suite:
-        configs = [{**c, "test_suites": [args.suite]} for c in configs]
+    if args.suites:
+        configs = [{**c, "test_suites": args.suites} for c in configs]
 
     if not configs:
         print(json.dumps({"error": "No matching configs", "overall": "FAIL"}))
@@ -138,7 +144,7 @@ def main():
         result = run_config(config)
         all_results.append(result)
 
-        fname = f"{config['gpu_type']}_{config['cuda_version']}.json".replace(".", "_")
+        fname = f"{config['gpu_type']}_{config['cuda_version'].replace('.', '_')}.json"
         out_path = out_dir / fname
         with open(out_path, "w") as f:
             json.dump(result, f, indent=2)
