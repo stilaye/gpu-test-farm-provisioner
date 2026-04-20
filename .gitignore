@@ -1,0 +1,45 @@
+# Test results
+results/
+
+# Terraform state and cache
+terraform/.terraform/
+terraform/.terraform.lock.hcl
+terraform/terraform.tfstate
+terraform/terraform.tfstate.backup
+terraform/*.tfstate*
+terraform/kvm/.terraform/
+terraform/kvm/.terraform.lock.hcl
+
+# Docker image tarballs (large binary)
+docker/cuda-test.tar
+docker/*.tar
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+.pytest_cache/
+*.egg-info/
+dist/
+build/
+venv/
+.venv/
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Editor
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Secrets (never commit)
+*.pem
+*.key
+id_rsa
+id_rsa.pub
+ansible-vault-password

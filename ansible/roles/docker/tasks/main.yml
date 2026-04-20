@@ -1,0 +1,25 @@
+---
+# Install Docker CLI — socket is mounted from host (Mac variant)
+# On KVM VMs, this installs full Docker CE engine
+
+- name: Update apt cache
+  apt:
+    update_cache: yes
+    cache_valid_time: 3600
+
+- name: Install Docker CLI
+  apt:
+    name: docker.io
+    state: present
+
+- name: Ensure docker group exists
+  group:
+    name: docker
+    state: present
+
+- name: Start and enable Docker service (if running as VM)
+  systemd:
+    name: docker
+    state: started
+    enabled: yes
+  ignore_errors: yes

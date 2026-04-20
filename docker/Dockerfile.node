@@ -1,0 +1,19 @@
+FROM ubuntu:22.04
+
+ENV DEBIAN_FRONTEND=noninteractive
+
+RUN apt-get update && apt-get install -y \
+    python3 \
+    python3-pip \
+    sudo \
+    curl \
+    wget \
+    ca-certificates \
+    apt-transport-https \
+    software-properties-common \
+    gnupg \
+    lsb-release \
+    && rm -rf /var/lib/apt/lists/*
+
+# Keep container running — simulates a VM that stays up
+CMD ["tail", "-f", "/dev/null"]

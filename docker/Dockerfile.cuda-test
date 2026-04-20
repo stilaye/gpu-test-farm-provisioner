@@ -1,0 +1,54 @@
+FROM python:3.11-slim
+
+ENV DEBIAN_FRONTEND=noninteractive
+
+# Install C toolchain + all three build systems
+RUN apt-get update && apt-get install -y \
+    gcc \
+    make \
+    cmake \
+    meson \
+    ninja-build \
+    autoconf \
+    automake \
+    libtool \
+    && rm -rf /var/lib/apt/lists/*
+
+# --- Tool 1: cmake (cuda_math_validator) ---
+COPY tests/cmake_validator/ /build/cmake_validator/
+RUN cd /build/cmake_validator \
+    && mkdir build && cd build \
+    && cmake .. -DCMAKE_BUILD_TYPE=Release \
+    && make \
+    && make install
+
+# --- Tool 2: autoconf/automake (cuda_version_checker) ---
+COPY tests/autoconf_checker/ /build/autoconf_checker/
+RUN cd /build/autoconf_checker \
+    && autoreconf --install \
+    && ./configure \
+    && make \
+    && make install
+
+# --- Tool 3: meson/ninja (cuda_stress_runner) ---
+COPY tests/meson_stress/ /build/meson_stress/
+RUN cd /build/meson_stress \
+    && meson setup build --prefix=/usr/local \
+    && cd build \
+    && ninja \
+    && ninja install
+
+# Clean up build artifacts
+RUN rm -rf /build
+
+# Simulate CUDA stub (version.txt read by cuda_version_checker)
+RUN mkdir -p /usr/local/cuda/bin /usr/local/cuda/lib64 \
+    && echo "CUDA Version 13.0" > /usr/local/cuda/version.txt
+
+# Python test runner orchestrates the C tools
+COPY test_runner.py /tests/
+COPY test_matrix.json /tests/
+
+WORKDIR /tests
+
+ENTRYPOINT ["python", "test_runner.py"]

@@ -1,0 +1,18 @@
+{
+  "test_configs": [
+    {
+      "gpu_type": "H100",
+      "cuda_version": "13.0",
+      "driver_version": "550.90",
+      "os": "ubuntu-22.04",
+      "test_suites": ["cublas_regression", "driver_compat", "stress"]
+    },
+    {
+      "gpu_type": "A100",
+      "cuda_version": "12.8",
+      "driver_version": "535.183",
+      "os": "ubuntu-22.04",
+      "test_suites": ["cublas_regression", "driver_compat"]
+    }
+  ]
+}

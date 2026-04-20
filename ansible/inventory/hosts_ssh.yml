@@ -1,0 +1,11 @@
+# SSH inventory — used with KVM VMs (Linux/AWS Phase 2)
+# Switch with: cp ansible/inventory/hosts_ssh.yml ansible/inventory/hosts.yml
+
+[gpu_nodes]
+gpu-node-1 ansible_host=192.168.122.101
+gpu-node-2 ansible_host=192.168.122.102
+
+[gpu_nodes:vars]
+ansible_user=ubuntu
+ansible_ssh_private_key_file=~/.ssh/id_rsa
+ansible_python_interpreter=/usr/bin/python3

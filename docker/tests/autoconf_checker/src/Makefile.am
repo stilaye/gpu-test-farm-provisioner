@@ -1,0 +1,2 @@
+bin_PROGRAMS = cuda_version_checker
+cuda_version_checker_SOURCES = cuda_version_checker.c

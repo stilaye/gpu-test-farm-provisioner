@@ -1,0 +1,66 @@
+---
+# Simulate CUDA Toolkit installation — mirrors real GPU node setup
+# Creates /usr/local/cuda/ structure with stub binaries and version file
+
+- name: Create CUDA directory structure
+  file:
+    path: "{{ item }}"
+    state: directory
+    mode: '0755'
+  loop:
+    - /usr/local/cuda
+    - /usr/local/cuda/bin
+    - /usr/local/cuda/lib64
+    - /usr/local/cuda/include
+
+- name: Write CUDA version file
+  copy:
+    dest: /usr/local/cuda/version.txt
+    content: "CUDA Version 13.0\n"
+    mode: '0644'
+
+- name: Create stub nvcc binary
+  copy:
+    dest: /usr/local/cuda/bin/nvcc
+    content: |
+      #!/bin/bash
+      # Stub nvcc — simulates CUDA compiler
+      if [[ "$*" == *"--version"* ]]; then
+        echo "nvcc: NVIDIA (R) Cuda compiler driver"
+        echo "Copyright (c) 2005-2024 NVIDIA Corporation"
+        echo "Built on Wed_Apr_17_19:36:51_PDT_2024"
+        echo "Cuda compilation tools, release 13.0, V13.0.0"
+        echo "Build cuda_13.0.r13.0/compiler.34431801_0"
+      fi
+    mode: '0755'
+
+- name: Create stub nvidia-smi binary
+  copy:
+    dest: /usr/local/bin/nvidia-smi
+    content: |
+      #!/bin/bash
+      # Stub nvidia-smi — simulates GPU driver tool
+      echo "+-----------------------------------------------------------------------------+"
+      echo "| NVIDIA-SMI 550.90         Driver Version: 550.90    CUDA Version: 13.0     |"
+      echo "|-------------------------------+----------------------+----------------------+"
+      echo "| GPU  Name        Persistence-M| Bus-Id        Disp.A | Volatile Uncorr. ECC |"
+      echo "| Fan  Temp  Perf  Pwr:Usage/Cap|         Memory-Usage | GPU-Util  Compute M. |"
+      echo "|===============================+======================+======================|"
+      echo "|   0  NVIDIA H100         Off  | 00000000:00:00.0 Off |                    0 |"
+      echo "| N/A   35C    P0    72W / 700W |      0MiB / 81559MiB |      0%      Default |"
+      echo "+-------------------------------+----------------------+----------------------+"
+    mode: '0755'
+
+- name: Add CUDA bin to PATH via profile.d
+  copy:
+    dest: /etc/profile.d/cuda.sh
+    content: |
+      export PATH=/usr/local/cuda/bin:$PATH
+      export LD_LIBRARY_PATH=/usr/local/cuda/lib64:$LD_LIBRARY_PATH
+    mode: '0644'
+
+- name: Create nvcc symlink in /usr/local/bin
+  file:
+    src: /usr/local/cuda/bin/nvcc
+    dest: /usr/local/bin/nvcc
+    state: link

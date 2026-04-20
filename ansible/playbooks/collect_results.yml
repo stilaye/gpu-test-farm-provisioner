@@ -1,0 +1,26 @@
+---
+- name: Collect test results from GPU nodes
+  hosts: gpu_nodes
+  become: no
+
+  vars:
+    local_results_dir: "{{ playbook_dir }}/../../results"
+
+  tasks:
+    - name: Find result JSON files on node
+      find:
+        paths: /opt/test_results
+        patterns: "*.json"
+      register: result_files
+
+    - name: Fetch result files to local results directory
+      fetch:
+        src: "{{ item.path }}"
+        dest: "{{ local_results_dir }}/{{ inventory_hostname }}/"
+        flat: yes
+      loop: "{{ result_files.files }}"
+      when: result_files.files | length > 0
+
+    - name: Report collection summary
+      debug:
+        msg: "Collected {{ result_files.files | length }} result file(s) from {{ inventory_hostname }}"

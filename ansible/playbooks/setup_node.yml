@@ -1,0 +1,28 @@
+---
+- name: Configure GPU test nodes
+  hosts: gpu_nodes
+  become: yes
+  gather_facts: yes
+
+  roles:
+    - docker
+    - cuda_stub
+    - test_runner
+
+  post_tasks:
+    - name: Verify Docker is accessible
+      command: docker --version
+      register: docker_ver
+      ignore_errors: yes
+
+    - name: Verify CUDA stub works
+      command: nvcc --version
+      register: nvcc_ver
+      ignore_errors: yes
+
+    - name: Summary
+      debug:
+        msg:
+          - "Node: {{ inventory_hostname }}"
+          - "Docker: {{ docker_ver.stdout | default('not available') }}"
+          - "CUDA:   {{ nvcc_ver.stdout_lines[3] | default('nvcc not available') }}"

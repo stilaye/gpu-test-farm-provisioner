@@ -1,0 +1,38 @@
+---
+- name: Deploy test workload to GPU nodes
+  hosts: gpu_nodes
+  become: yes
+
+  vars:
+    cuda_test_image: "cuda-test:latest"
+    test_image_tarball: "{{ playbook_dir }}/../../docker/cuda-test.tar"
+
+  tasks:
+    - name: Check if image tarball exists locally
+      local_action:
+        module: stat
+        path: "{{ test_image_tarball }}"
+      register: tarball_stat
+
+    - name: Copy test image tarball to node
+      copy:
+        src: "{{ test_image_tarball }}"
+        dest: /tmp/cuda-test.tar
+        mode: '0644'
+      when: tarball_stat.stat.exists
+
+    - name: Load test image into Docker on node
+      command: docker load -i /tmp/cuda-test.tar
+      when: tarball_stat.stat.exists
+
+    - name: Copy test matrix config
+      copy:
+        src: "{{ playbook_dir }}/../../docker/test_matrix.json"
+        dest: /opt/test_matrix.json
+        mode: '0644'
+
+    - name: Ensure results directory exists
+      file:
+        path: /opt/test_results
+        state: directory
+        mode: '0777'
